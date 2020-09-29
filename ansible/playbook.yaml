@@ -1,0 +1,49 @@
+- hosts: all
+  tasks:
+    - name: Create data folder
+      file:
+        path: /data
+        state: directory
+        mode: '0755'
+    - name: Create cert folder
+      file:
+        path: /data/certs
+        state: directory
+        mode: '0755'
+    - name: Create config folder
+      file:
+        path: /data/config
+        state: directory
+        mode: '0755'
+    - name: Copy ssl certificates
+      copy:
+        src: "{{ item }}"
+        dest: /data/certs
+        owner: root
+        group: root
+        mode: "0644"
+      with_fileglob:
+        - ../certs/*
+    - name: Copy nginx config
+      copy:
+        src: ../nginx-config/default.conf
+        dest: /data/config
+        owner: root
+        group: root
+        mode: "0644"
+    - name: Create compose folder 
+      file:
+        path: ~/compose
+        state: directory
+        mode: '0755'
+    - name: Copy docker-compose.yaml and env files
+      copy:
+        src: "{{ item }}"
+        dest: /root/compose
+        owner: root
+        group: root
+        mode: "0644"
+      with_fileglob:
+        - ../docker-compose/*
+    - name: Run docker-compose 
+      command: docker-compose -f /root/compose/docker-compose.yaml up -d 
